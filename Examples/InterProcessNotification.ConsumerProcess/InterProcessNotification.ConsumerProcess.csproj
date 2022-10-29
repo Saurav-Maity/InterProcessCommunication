@@ -48,11 +48,21 @@
     <Compile Include="..\..\Production\InterProcessNotification\Properties\GlobalAssemblyInfo.cs">
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="..\InterProcessNotification.ProducerProcess\Model\EventInfo.cs">
+      <Link>Model\EventInfo.cs</Link>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Production\InterProcessNotification\InterProcessNotification.csproj">
+      <Project>{410ab2eb-477f-4e03-90d7-c7708956f5bd}</Project>
+      <Name>InterProcessNotification</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

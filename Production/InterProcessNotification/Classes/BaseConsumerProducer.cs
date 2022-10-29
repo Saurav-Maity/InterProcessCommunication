@@ -1,43 +1,63 @@
 ﻿using System;
-using System.Diagnostics;
+using System.Text;
 using System.Threading;
+using System.Diagnostics;
+using System.IO.MemoryMappedFiles;
 
-namespace SauaS.InterProcessNotification.Classes
+using Newtonsoft.Json;
+using System.IO;
+using System.Runtime.InteropServices.ComTypes;
+
+namespace SauaS.Assemblies.InterProcessNotification.Classes
 {
     public class BaseConsumerProducer<T> : IDisposable
     {
-        protected string uniqueDataId;
+        private MemoryMappedFile memoryMappedFile;
         protected EventWaitHandle dataChangedHandle;
         protected EventWaitHandle consumerReadyHandle;
 
-        protected BaseConsumerProducer(string uniqueDataId)
+        protected BaseConsumerProducer(string uniqueSystemWideName)
         {
-            this.uniqueDataId = uniqueDataId;
-            int sessionId = Process.GetCurrentProcess().SessionId;
+            //Global is not required if running as Session > 0 (i.e. as Application not as Windows Service)
+            string systemWideName = $"{(Process.GetCurrentProcess().SessionId == 0 ? $@"Global\{uniqueSystemWideName}" : uniqueSystemWideName)}";
 
-            dataChangedHandle = new EventWaitHandle(false, EventResetMode.AutoReset, $"{(sessionId == 0 ? $@"Global\{uniqueDataId}" : uniqueDataId)}");
-            consumerReadyHandle = new EventWaitHandle(false, EventResetMode.AutoReset, $"{(sessionId == 0 ? $@"Global\{uniqueDataId}" : uniqueDataId)}-ConsumerReady");
+            dataChangedHandle = new EventWaitHandle(false, EventResetMode.AutoReset, systemWideName);
+            consumerReadyHandle = new EventWaitHandle(false, EventResetMode.AutoReset, $"{systemWideName}-ConsumerReady");
+            memoryMappedFile = MemoryMappedFile.CreateOrOpen($"{systemWideName}-MemoryFile", short.MaxValue);
         }
 
         protected bool IsDisposed { get; private set; }
 
-        protected T DeserializeFromMemoryMappedFile()
+        protected T ReadFromMemoryMappedFile()
         {
-            return default(T);
+            T data = default(T);
+            using (MemoryMappedViewStream memoryMappedViewStream = memoryMappedFile.CreateViewStream())
+            {
+                string dataAsString = string.Empty;
+                BinaryReader binaryReader = new BinaryReader(memoryMappedViewStream);
+                dataAsString = binaryReader.ReadString();
+
+                data = JsonConvert.DeserializeObject<T>(dataAsString);
+            }
+
+            return data;
         }
 
-        protected bool SerializeToMemoryMappedFile(T data)
+        protected void WriteToMemoryMappedFile(T data)
         {
-            bool result = false;
-
-            return result;
+            using (MemoryMappedViewStream memoryMappedViewStream = memoryMappedFile.CreateViewStream())
+            {
+                BinaryWriter binaryWriter = new BinaryWriter(memoryMappedViewStream);
+                binaryWriter.Write(JsonConvert.SerializeObject(data));
+            }
         }
 
         public void Dispose()
         {
+            IsDisposed = true;
             dataChangedHandle?.Dispose();
             consumerReadyHandle?.Dispose();
-            IsDisposed = true;
+            memoryMappedFile?.Dispose();            
         }
     }
 }

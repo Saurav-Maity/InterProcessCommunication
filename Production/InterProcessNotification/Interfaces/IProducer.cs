@@ -1,8 +1,6 @@
-﻿using System.Runtime.Serialization;
-
-namespace SauaS.InterProcessNotification.Interfaces
+﻿namespace SauaS.Assemblies.InterProcessNotification.Interfaces
 {
-    internal interface IProducer<T> where T : new()
+    public interface IProducer<T> where T : new()
     {
         void Update(T data);
     }

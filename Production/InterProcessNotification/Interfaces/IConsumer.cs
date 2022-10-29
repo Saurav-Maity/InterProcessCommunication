@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace SauaS.InterProcessNotification.Interfaces
+namespace SauaS.Assemblies.InterProcessNotification.Interfaces
 {
-    internal interface IConsumer<T> where T : new()
+    public interface IConsumer<T> where T : new()
     {
         event EventHandler<T> NotifyDataChanged;
     }

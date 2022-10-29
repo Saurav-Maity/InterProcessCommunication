@@ -1,18 +1,13 @@
-﻿using SauaS.InterProcessNotification.Classes;
-using SauaS.InterProcessNotification.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading;
+﻿using System;
 using System.Threading.Tasks;
+using SauaS.Assemblies.InterProcessNotification.Classes;
+using SauaS.Assemblies.InterProcessNotification.Interfaces;
 
-namespace SauaS.InterProcessNotification.Consumers
+namespace SauaS.Assemblies.InterProcessNotification.Consumers
 {
     public class Consumer<T> : BaseConsumerProducer<T>, IConsumer<T> where T : new()
     {      
-        public Consumer(string uniqueDataId) : base (uniqueDataId)
+        public Consumer(string uniqueSystemWideName) : base (uniqueSystemWideName)
         {
             CheckDataChangedAsync();
         }
@@ -28,7 +23,7 @@ namespace SauaS.InterProcessNotification.Consumers
                     consumerReadyHandle.Set();
                     dataChangedHandle.WaitOne();
 
-                    T data = DeserializeFromMemoryMappedFile();
+                    T data = ReadFromMemoryMappedFile();
                     OnNotifyChange(data);
                 }
             }, TaskCreationOptions.LongRunning);
