@@ -1,0 +1,10 @@
+# Generated files/directories
+bin/
+obj/
+Output/
+Packages/
+
+
+# Editor temp files
+*.vs
+*.user
